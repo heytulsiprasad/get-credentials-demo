@@ -1,17 +1,49 @@
 import React, { useState } from "react";
+import { auth } from "./../firebase";
 
 const Form = () => {
-  const [values, setValues] = useState({});
+  const [values, setValues] = useState({ email: "", password: "" });
+  const [error, setError] = useState(null);
 
   const changeHandler = (e) => {
+    setError(null);
+
     setValues({
       ...values,
       [e.target.name]: e.target.value,
     });
   };
 
-  const submitHandler = (e) => {
+  // Login
+  const submitHandler = async (e) => {
     e.preventDefault();
+
+    const { email, password } = values;
+    setError(null);
+
+    if (email && password) {
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        setError(err);
+        throw err;
+      }
+    }
+  };
+
+  // Signup
+  const signUpHandler = async (e) => {
+    const { email, password } = values;
+    setError(null);
+
+    if (email && password) {
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch (err) {
+        setError(err);
+        throw err;
+      }
+    }
   };
 
   return (
@@ -39,17 +71,38 @@ const Form = () => {
             onChange={changeHandler}
           />
         </label>
-        <button
-          style={{ maxWidth: "max-content", marginTop: "1rem" }}
-          type="submit"
-        >
-          Done
-        </button>
+        <div style={{ display: "inline" }}>
+          <button
+            style={{
+              maxWidth: "max-content",
+              marginTop: "1rem",
+              marginRight: "1rem",
+            }}
+            onClick={submitHandler}
+            type="submit"
+          >
+            Log In
+          </button>
+          <button
+            style={{ maxWidth: "max-content", marginTop: "1rem" }}
+            type="button"
+            onClick={signUpHandler}
+          >
+            Sign Up
+          </button>
+        </div>
       </form>
       <div style={{ color: "blue" }}>
         {values && (
           <pre>
             <code>{JSON.stringify(values, null, 4)}</code>
+          </pre>
+        )}
+      </div>
+      <div style={{ color: "red" }}>
+        {error && (
+          <pre>
+            <code>{JSON.stringify(error, null, 4)}</code>
           </pre>
         )}
       </div>
